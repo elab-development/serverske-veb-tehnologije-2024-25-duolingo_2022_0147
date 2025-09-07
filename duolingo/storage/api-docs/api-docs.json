@@ -1,0 +1,1961 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Duolingo API",
+        "description": "API documentation for Duolingo application.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Local development server"
+        }
+    ],
+    "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new user",
+                "operationId": "8a56853624e025573120a09a4c75d468",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Stefan"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "stefan@mail"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "minLength": 8,
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User registered",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Stefan"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "stefan@mail"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "student"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "1|aVeryLongSanctumTokenHere"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login and receive an access token",
+                "operationId": "a3b306d14572d1f4bd6c064b3233e7b8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "stefan@mail"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Logged in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Stefan logged in"
+                                        },
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "1|aVeryLongSanctumTokenHere"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Wrong credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "WRONG INPUT"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout (revoke all tokens)",
+                "operationId": "fe8f3429cd6979b3b4517e186505f9f9",
+                "responses": {
+                    "200": {
+                        "description": "Logged out",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You have successfully logged out."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses": {
+            "get": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "List all courses (public)",
+                "operationId": "02eeda67042dba2d22a517f26fb8eaf1",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "courses": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "German B1 – Conversation"
+                                                    },
+                                                    "language": {
+                                                        "type": "string",
+                                                        "example": "German"
+                                                    },
+                                                    "level": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "A1",
+                                                            "A2",
+                                                            "B1",
+                                                            "B2",
+                                                            "C1",
+                                                            "C2"
+                                                        ],
+                                                        "example": "B1"
+                                                    },
+                                                    "teacher_id": {
+                                                        "type": "integer",
+                                                        "example": 5,
+                                                        "nullable": true
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No courses found."
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Create a new course (admin only)",
+                "operationId": "a4d6b7e7be59571034428ffbb86aaf0a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "language",
+                                    "level"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "German B1 – Conversation"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "German"
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "enum": [
+                                            "A1",
+                                            "A2",
+                                            "B1",
+                                            "B2",
+                                            "C1",
+                                            "C2"
+                                        ],
+                                        "example": "B1"
+                                    },
+                                    "teacher_id": {
+                                        "type": "integer",
+                                        "example": 5,
+                                        "nullable": true
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Course created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course created successfully"
+                                        },
+                                        "course": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "German B1 – Conversation"
+                                                },
+                                                "language": {
+                                                    "type": "string",
+                                                    "example": "German"
+                                                },
+                                                "level": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "A1",
+                                                        "A2",
+                                                        "B1",
+                                                        "B2",
+                                                        "C1",
+                                                        "C2"
+                                                    ],
+                                                    "example": "B1"
+                                                },
+                                                "teacher_id": {
+                                                    "type": "integer",
+                                                    "example": 5,
+                                                    "nullable": true
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only admins can create courses"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/teacher/{id}": {
+            "get": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "List courses taught by a specific teacher (admin only)",
+                "operationId": "2e8f2265d70c39794847fba74cc64b69",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Teacher ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "teacher": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Stefan"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "stefan@mail"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "courses": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "German B1 – Conversation"
+                                                    },
+                                                    "language": {
+                                                        "type": "string",
+                                                        "example": "German"
+                                                    },
+                                                    "level": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "A1",
+                                                            "A2",
+                                                            "B1",
+                                                            "B2",
+                                                            "C1",
+                                                            "C2"
+                                                        ],
+                                                        "example": "B1"
+                                                    },
+                                                    "teacher_id": {
+                                                        "type": "integer",
+                                                        "example": 5,
+                                                        "nullable": true
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only admins can access this resource"
+                    },
+                    "404": {
+                        "description": "Teacher not found or no courses for this teacher"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{course}": {
+            "get": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Get a single course (public)",
+                "operationId": "c296c0c8738577d66bdd1332e8684906",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "course": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "German B1 – Conversation"
+                                                },
+                                                "language": {
+                                                    "type": "string",
+                                                    "example": "German"
+                                                },
+                                                "level": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "A1",
+                                                        "A2",
+                                                        "B1",
+                                                        "B2",
+                                                        "C1",
+                                                        "C2"
+                                                    ],
+                                                    "example": "B1"
+                                                },
+                                                "teacher_id": {
+                                                    "type": "integer",
+                                                    "example": 5,
+                                                    "nullable": true
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Update a course (admin only)",
+                "operationId": "5f1701987d5321072267c5f888fd05af",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "German B2 – Intensive"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "German"
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "enum": [
+                                            "A1",
+                                            "A2",
+                                            "B1",
+                                            "B2",
+                                            "C1",
+                                            "C2"
+                                        ],
+                                        "example": "B2"
+                                    },
+                                    "teacher_id": {
+                                        "type": "integer",
+                                        "example": 8,
+                                        "nullable": true
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Course updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course updated successfully"
+                                        },
+                                        "course": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "German B2 – Intensive"
+                                                },
+                                                "language": {
+                                                    "type": "string",
+                                                    "example": "German"
+                                                },
+                                                "level": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "A1",
+                                                        "A2",
+                                                        "B1",
+                                                        "B2",
+                                                        "C1",
+                                                        "C2"
+                                                    ],
+                                                    "example": "B2"
+                                                },
+                                                "teacher_id": {
+                                                    "type": "integer",
+                                                    "example": 8,
+                                                    "nullable": true
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only admins can update courses"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Delete a course (admin only)",
+                "operationId": "9419855e165089a432c2ebb75bfd74b4",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only admins can delete courses"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/enrollments": {
+            "get": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "List enrollments (auth). Student→own; Teacher→their courses; Admin→all",
+                "operationId": "e10c9170029fc2712ce897b551063cbf",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Page size (1–100); only items array is returned in payload",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 15
+                    },
+                    {
+                        "name": "course_id",
+                        "in": "query",
+                        "description": "Filter by course",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 12
+                    },
+                    {
+                        "name": "student_id",
+                        "in": "query",
+                        "description": "(Admin only) filter by student",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 33
+                    },
+                    {
+                        "name": "status[]",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "required": false,
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "active",
+                                    "completed",
+                                    "cancelled"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "(Teacher/Admin) search by student name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Stefan"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "enrollments": {
+                                            "type": "array",
+                                            "items": {
+                                                "oneOf": [
+                                                    {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 101
+                                                            },
+                                                            "course_id": {
+                                                                "type": "integer",
+                                                                "example": 12
+                                                            },
+                                                            "student_id": {
+                                                                "type": "integer",
+                                                                "example": 33
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "active",
+                                                                    "completed",
+                                                                    "cancelled"
+                                                                ],
+                                                                "example": "active"
+                                                            },
+                                                            "course_title": {
+                                                                "type": "string",
+                                                                "example": "German B1 – Conversation"
+                                                            },
+                                                            "student_name": {
+                                                                "type": "string",
+                                                                "example": "Stefan"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "course_id": {
+                                                                "type": "integer",
+                                                                "example": 12
+                                                            },
+                                                            "course_title": {
+                                                                "type": "string",
+                                                                "example": "German B1 – Conversation"
+                                                            },
+                                                            "student_id": {
+                                                                "type": "integer",
+                                                                "example": 33
+                                                            },
+                                                            "student_name": {
+                                                                "type": "string",
+                                                                "example": "Stefan"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "active",
+                                                                    "completed",
+                                                                    "cancelled"
+                                                                ],
+                                                                "example": "completed"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden for this course (teacher scope)"
+                    },
+                    "404": {
+                        "description": "No enrollments found."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Create an enrollment (student only)",
+                "operationId": "b5e369b8961e3cc480e849055f0fed5e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "course_id"
+                                ],
+                                "properties": {
+                                    "course_id": {
+                                        "type": "integer",
+                                        "example": 12
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Enrollment created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Enrollment created successfully"
+                                        },
+                                        "enrollment": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 101
+                                                },
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "student_id": {
+                                                    "type": "integer",
+                                                    "example": 33
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "active",
+                                                        "completed",
+                                                        "cancelled"
+                                                    ],
+                                                    "example": "active"
+                                                },
+                                                "course_title": {
+                                                    "type": "string",
+                                                    "example": "German B1 – Conversation"
+                                                },
+                                                "student_name": {
+                                                    "type": "string",
+                                                    "example": "Stefan"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only students can create enrollments"
+                    },
+                    "409": {
+                        "description": "Already enrolled in this course"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/student/{id}/enrollments": {
+            "get": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "List all enrollments for a specific student (admin only)",
+                "operationId": "1b564c0b534030a914b37f8fdb26a4e1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Student ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "student": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 33
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Stefan"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "stefan@mail"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "enrollments": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 101
+                                                    },
+                                                    "course_id": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "student_id": {
+                                                        "type": "integer",
+                                                        "example": 33
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "active",
+                                                            "completed",
+                                                            "cancelled"
+                                                        ],
+                                                        "example": "completed"
+                                                    },
+                                                    "course_title": {
+                                                        "type": "string",
+                                                        "example": "German B1 – Conversation"
+                                                    },
+                                                    "student_name": {
+                                                        "type": "string",
+                                                        "example": "Stefan"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only admins can access this resource"
+                    },
+                    "404": {
+                        "description": "Student not found or no enrollments"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/enrollments/{enrollment}": {
+            "put": {
+                "tags": [
+                    "Enrollments"
+                ],
+                "summary": "Update enrollment status (admin or course teacher)",
+                "operationId": "9cad1f64a2998318f02cce5ae60a8bb0",
+                "parameters": [
+                    {
+                        "name": "enrollment",
+                        "in": "path",
+                        "description": "Enrollment ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "active",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "completed"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Enrollment updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Enrollment updated successfully"
+                                        },
+                                        "enrollment": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 101
+                                                },
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "student_id": {
+                                                    "type": "integer",
+                                                    "example": 33
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "active",
+                                                        "completed",
+                                                        "cancelled"
+                                                    ],
+                                                    "example": "completed"
+                                                },
+                                                "course_title": {
+                                                    "type": "string",
+                                                    "example": "German B1 – Conversation"
+                                                },
+                                                "student_name": {
+                                                    "type": "string",
+                                                    "example": "Stefan"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/lessons": {
+            "get": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "List lessons (auth required) with search, filters, sort & pagination",
+                "operationId": "db776a108da2bb0a2f97ede1e0443b1c",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search in lesson title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Past tense"
+                    },
+                    {
+                        "name": "teacher_id",
+                        "in": "query",
+                        "description": "Filter by teacher ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 7
+                    },
+                    {
+                        "name": "course_id",
+                        "in": "query",
+                        "description": "Filter by course ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 12
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "description": "Sort field (allowed: starts_at, title, created_at)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "starts_at",
+                                "title",
+                                "created_at"
+                            ]
+                        },
+                        "example": "starts_at"
+                    },
+                    {
+                        "name": "sort_dir",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        },
+                        "example": "asc"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Page size (1–100). Returns only the items array in payload.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 10
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "lessons": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 101
+                                                    },
+                                                    "course_id": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "teacher_id": {
+                                                        "type": "integer",
+                                                        "example": 7
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Unit 3: Past Tense"
+                                                    },
+                                                    "starts_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-01T10:00:00Z"
+                                                    },
+                                                    "ends_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-01T11:30:00Z",
+                                                        "nullable": true
+                                                    },
+                                                    "teacher": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 7
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Stefan"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "No lessons found."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Create a lesson (teacher only; must teach the course)",
+                "operationId": "658a38a7547f197dff10e6e5a181517f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "course_id",
+                                    "title",
+                                    "starts_at"
+                                ],
+                                "properties": {
+                                    "course_id": {
+                                        "type": "integer",
+                                        "example": 12
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Unit 3: Past Tense"
+                                    },
+                                    "starts_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-09-01T10:00:00Z"
+                                    },
+                                    "ends_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-09-01T11:30:00Z",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lesson created successfully"
+                                        },
+                                        "lesson": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 101
+                                                },
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "teacher_id": {
+                                                    "type": "integer",
+                                                    "example": 7
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Unit 3: Past Tense"
+                                                },
+                                                "starts_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-01T10:00:00Z"
+                                                },
+                                                "ends_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-01T11:30:00Z",
+                                                    "nullable": true
+                                                },
+                                                "teacher": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 7
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Stefan"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only teachers can create lessons / You are not the teacher of this course"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/lessons/{lesson}": {
+            "get": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Get a single lesson (auth required)",
+                "operationId": "f32170bef9f4c921d0b6f685ec52c2eb",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "description": "Lesson ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "lesson": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 101
+                                                },
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "teacher_id": {
+                                                    "type": "integer",
+                                                    "example": 7
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Unit 3: Past Tense"
+                                                },
+                                                "starts_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-01T10:00:00Z"
+                                                },
+                                                "ends_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-01T11:30:00Z",
+                                                    "nullable": true
+                                                },
+                                                "teacher": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 7
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Stefan"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Lesson not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Update a lesson (teacher only; must teach the course)",
+                "operationId": "73b130595c873899cec53486a9964352",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "description": "Lesson ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Unit 3: Past Tense – Review"
+                                    },
+                                    "starts_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-09-01T10:30:00Z"
+                                    },
+                                    "ends_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-09-01T12:00:00Z",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lesson updated successfully"
+                                        },
+                                        "lesson": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 101
+                                                },
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "teacher_id": {
+                                                    "type": "integer",
+                                                    "example": 7
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Unit 3: Past Tense – Review"
+                                                },
+                                                "starts_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-01T10:30:00Z"
+                                                },
+                                                "ends_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-01T12:00:00Z",
+                                                    "nullable": true
+                                                },
+                                                "teacher": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 7
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Stefan"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only teachers can update lessons / You are not the teacher of this course"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Delete a lesson (teacher only; must teach the course)",
+                "operationId": "9cebf75653bf2011b4b9d952a587217d",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "description": "Lesson ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lesson deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Only teachers can delete lessons / You are not the teacher of this course"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/translate": {
+            "get": {
+                "tags": [
+                    "Translate"
+                ],
+                "summary": "Translate a sentence from a source language to a target language",
+                "description": "Uses the public MyMemory API. Accepts language names (e.g., 'German') or ISO-2 codes (e.g., 'de').",
+                "operationId": "1445a414e091b8b0fd17e86d0cff26df",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Text to translate (max 2000 chars)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 2000
+                        },
+                        "example": "Hello, how are you?"
+                    },
+                    {
+                        "name": "source",
+                        "in": "query",
+                        "description": "Source language (name or ISO-2 code)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "en"
+                    },
+                    {
+                        "name": "target",
+                        "in": "query",
+                        "description": "Target language (name or ISO-2 code)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "de"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "source": {
+                                            "properties": {
+                                                "lang": {
+                                                    "type": "string",
+                                                    "example": "en"
+                                                },
+                                                "text": {
+                                                    "type": "string",
+                                                    "example": "Hello, how are you?"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "target": {
+                                            "properties": {
+                                                "lang": {
+                                                    "type": "string",
+                                                    "example": "de"
+                                                },
+                                                "text": {
+                                                    "type": "string",
+                                                    "example": "Hallo, wie geht es dir?"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "type": "string",
+                                            "example": "MyMemory"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or unsupported language",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Use ISO-2 codes (e.g., en, de, fr) or common names (English, German...)"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Translation service not reachable",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Translation service not reachable"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No translation found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "No translation found."
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Courses",
+            "description": "Public listing/show; admin-only create/update/delete; admin can fetch courses by teacher"
+        },
+        {
+            "name": "Enrollments",
+            "description": "Role-based access: student (own), teacher (their courses), admin (all)"
+        },
+        {
+            "name": "Lessons",
+            "description": "Authenticated listing/show; teachers can create/update/delete only on their own courses"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Translate",
+            "description": "Translate"
+        }
+    ]
+}
