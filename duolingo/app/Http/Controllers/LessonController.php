@@ -8,10 +8,75 @@ use App\Models\Lesson;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @OA\Tag(
+ *   name="Lessons",
+ *   description="Authenticated listing/show; teachers can create/update/delete only on their own courses"
+ * )
+ */
 class LessonController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *   path="/api/lessons",
+     *   tags={"Lessons"},
+     *   summary="List lessons (auth required) with search, filters, sort & pagination",
+     *   security={{"bearerAuth":{}}},
+     *   @OA\Parameter(
+     *     name="search", in="query", required=false, description="Search in lesson title",
+     *     @OA\Schema(type="string"), example="Past tense"
+     *   ),
+     *   @OA\Parameter(
+     *     name="teacher_id", in="query", required=false, description="Filter by teacher ID",
+     *     @OA\Schema(type="integer"), example=7
+     *   ),
+     *   @OA\Parameter(
+     *     name="course_id", in="query", required=false, description="Filter by course ID",
+     *     @OA\Schema(type="integer"), example=12
+     *   ),
+     *   @OA\Parameter(
+     *     name="sort_by", in="query", required=false,
+     *     description="Sort field (allowed: starts_at, title, created_at)",
+     *     @OA\Schema(type="string", enum={"starts_at","title","created_at"}), example="starts_at"
+     *   ),
+     *   @OA\Parameter(
+     *     name="sort_dir", in="query", required=false,
+     *     description="Sort direction",
+     *     @OA\Schema(type="string", enum={"asc","desc"}), example="asc"
+     *   ),
+     *   @OA\Parameter(
+     *     name="per_page", in="query", required=false,
+     *     description="Page size (1–100). Returns only the items array in payload.",
+     *     @OA\Schema(type="integer", minimum=1, maximum=100), example=10
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="OK",
+     *     @OA\JsonContent(
+     *       type="object",
+     *       @OA\Property(
+     *         property="lessons",
+     *         type="array",
+     *         @OA\Items(
+     *           type="object",
+     *           @OA\Property(property="id", type="integer", example=101),
+     *           @OA\Property(property="course_id", type="integer", example=12),
+     *           @OA\Property(property="teacher_id", type="integer", example=7),
+     *           @OA\Property(property="title", type="string", example="Unit 3: Past Tense"),
+     *           @OA\Property(property="starts_at", type="string", format="date-time", example="2025-09-01T10:00:00Z"),
+     *           @OA\Property(property="ends_at", type="string", format="date-time", nullable=true, example="2025-09-01T11:30:00Z"),
+     *           @OA\Property(
+     *             property="teacher", type="object",
+     *             @OA\Property(property="id", type="integer", example=7),
+     *             @OA\Property(property="name", type="string", example="Stefan")
+     *           )
+     *         )
+     *       )
+     *     )
+     *   ),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     *   @OA\Response(response=404, description="No lessons found.")
+     * )
      */
     public function index(Request $request)
     {
@@ -67,7 +132,47 @@ class LessonController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *   path="/api/lessons",
+     *   tags={"Lessons"},
+     *   summary="Create a lesson (teacher only; must teach the course)",
+     *   security={{"bearerAuth":{}}},
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\JsonContent(
+     *       required={"course_id","title","starts_at"},
+     *       @OA\Property(property="course_id", type="integer", example=12),
+     *       @OA\Property(property="title", type="string", maxLength=255, example="Unit 3: Past Tense"),
+     *       @OA\Property(property="starts_at", type="string", format="date-time", example="2025-09-01T10:00:00Z"),
+     *       @OA\Property(property="ends_at", type="string", format="date-time", nullable=true, example="2025-09-01T11:30:00Z")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Created",
+     *     @OA\JsonContent(
+     *       type="object",
+     *       @OA\Property(property="message", type="string", example="Lesson created successfully"),
+     *       @OA\Property(
+     *         property="lesson", type="object",
+     *         @OA\Property(property="id", type="integer", example=101),
+     *         @OA\Property(property="course_id", type="integer", example=12),
+     *         @OA\Property(property="teacher_id", type="integer", example=7),
+     *         @OA\Property(property="title", type="string", example="Unit 3: Past Tense"),
+     *         @OA\Property(property="starts_at", type="string", format="date-time", example="2025-09-01T10:00:00Z"),
+     *         @OA\Property(property="ends_at", type="string", format="date-time", nullable=true, example="2025-09-01T11:30:00Z"),
+     *         @OA\Property(
+     *           property="teacher", type="object",
+     *           @OA\Property(property="id", type="integer", example=7),
+     *           @OA\Property(property="name", type="string", example="Stefan")
+     *         )
+     *       )
+     *     )
+     *   ),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     *   @OA\Response(response=403, description="Only teachers can create lessons / You are not the teacher of this course"),
+     *   @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function store(Request $request)
     {
@@ -105,8 +210,40 @@ class LessonController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
+     /**
+     * @OA\Get(
+     *   path="/api/lessons/{lesson}",
+     *   tags={"Lessons"},
+     *   summary="Get a single lesson (auth required)",
+     *   security={{"bearerAuth":{}}},
+     *   @OA\Parameter(
+     *     name="lesson", in="path", required=true, description="Lesson ID",
+     *     @OA\Schema(type="integer")
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="OK",
+     *     @OA\JsonContent(
+     *       type="object",
+     *       @OA\Property(
+     *         property="lesson", type="object",
+     *         @OA\Property(property="id", type="integer", example=101),
+     *         @OA\Property(property="course_id", type="integer", example=12),
+     *         @OA\Property(property="teacher_id", type="integer", example=7),
+     *         @OA\Property(property="title", type="string", example="Unit 3: Past Tense"),
+     *         @OA\Property(property="starts_at", type="string", format="date-time", example="2025-09-01T10:00:00Z"),
+     *         @OA\Property(property="ends_at", type="string", format="date-time", nullable=true, example="2025-09-01T11:30:00Z"),
+     *         @OA\Property(
+     *           property="teacher", type="object",
+     *           @OA\Property(property="id", type="integer", example=7),
+     *           @OA\Property(property="name", type="string", example="Stefan")
+     *         )
+     *       )
+     *     )
+     *   ),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     *   @OA\Response(response=404, description="Lesson not found")
+     * )
      */
     public function show(Lesson $lesson)
     {
@@ -129,8 +266,50 @@ class LessonController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
+     /**
+     * @OA\Put(
+     *   path="/api/lessons/{lesson}",
+     *   tags={"Lessons"},
+     *   summary="Update a lesson (teacher only; must teach the course)",
+     *   security={{"bearerAuth":{}}},
+     *   @OA\Parameter(
+     *     name="lesson", in="path", required=true, description="Lesson ID",
+     *     @OA\Schema(type="integer")
+     *   ),
+     *   @OA\RequestBody(
+     *     required=false,
+     *     @OA\JsonContent(
+     *       @OA\Property(property="title", type="string", maxLength=255, example="Unit 3: Past Tense – Review"),
+     *       @OA\Property(property="starts_at", type="string", format="date-time", example="2025-09-01T10:30:00Z"),
+     *       @OA\Property(property="ends_at", type="string", format="date-time", nullable=true, example="2025-09-01T12:00:00Z")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Updated",
+     *     @OA\JsonContent(
+     *       type="object",
+     *       @OA\Property(property="message", type="string", example="Lesson updated successfully"),
+     *       @OA\Property(
+     *         property="lesson", type="object",
+     *         @OA\Property(property="id", type="integer", example=101),
+     *         @OA\Property(property="course_id", type="integer", example=12),
+     *         @OA\Property(property="teacher_id", type="integer", example=7),
+     *         @OA\Property(property="title", type="string", example="Unit 3: Past Tense – Review"),
+     *         @OA\Property(property="starts_at", type="string", format="date-time", example="2025-09-01T10:30:00Z"),
+     *         @OA\Property(property="ends_at", type="string", format="date-time", nullable=true, example="2025-09-01T12:00:00Z"),
+     *         @OA\Property(
+     *           property="teacher", type="object",
+     *           @OA\Property(property="id", type="integer", example=7),
+     *           @OA\Property(property="name", type="string", example="Stefan")
+     *         )
+     *       )
+     *     )
+     *   ),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     *   @OA\Response(response=403, description="Only teachers can update lessons / You are not the teacher of this course"),
+     *   @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function update(Request $request, Lesson $lesson)
     {
@@ -168,7 +347,26 @@ class LessonController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *   path="/api/lessons/{lesson}",
+     *   tags={"Lessons"},
+     *   summary="Delete a lesson (teacher only; must teach the course)",
+     *   security={{"bearerAuth":{}}},
+     *   @OA\Parameter(
+     *     name="lesson", in="path", required=true, description="Lesson ID",
+     *     @OA\Schema(type="integer")
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Deleted",
+     *     @OA\JsonContent(
+     *       type="object",
+     *       @OA\Property(property="message", type="string", example="Lesson deleted successfully")
+     *     )
+     *   ),
+     *   @OA\Response(response=401, description="Unauthorized"),
+     *   @OA\Response(response=403, description="Only teachers can delete lessons / You are not the teacher of this course")
+     * )
      */
     public function destroy(Lesson $lesson)
     {
